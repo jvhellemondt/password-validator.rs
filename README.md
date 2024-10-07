@@ -28,9 +28,7 @@ Value in:
 
 Value out (success):
 ```rust
-struct Password {
-  value: String
-}
+struct Password(String);
 ```
 
 Value out (errors):
@@ -38,7 +36,7 @@ Value out (errors):
 
 API:
 ```rust
-let passwordResult = Password::new(serialized_input);
+let passwordResult = Password::new(input);
 ```
 
 ### AUTOMATE
