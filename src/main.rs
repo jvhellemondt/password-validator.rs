@@ -7,6 +7,7 @@ enum PasswordValidationErrors {
     TooShort,
     TooLong,
     MissingDigit,
+    MissingUppercase,
 }
 
 #[derive(Debug, PartialEq)]
@@ -24,6 +25,10 @@ impl PasswordValidator {
                 !value.chars().any(|c| c.is_digit(10)),
                 PasswordValidationErrors::MissingDigit,
             ),
+            (
+                !value.chars().any(|c| c.is_uppercase()),
+                PasswordValidationErrors::MissingUppercase,
+            ),
         ]
         .into_iter()
         .find_map(|(condition, error)| condition.then_some(error));
@@ -40,7 +45,7 @@ mod tests {
 
     #[test]
     fn valid_passwords() {
-        let valid_passwords: Vec<&str> = vec!["password1"];
+        let valid_passwords: Vec<&str> = vec!["Password1"];
         for input in valid_passwords {
             let result = PasswordValidator::new(input);
             assert!(result.is_ok());
@@ -58,6 +63,7 @@ mod tests {
                 PasswordValidationErrors::TooLong,
             ),
             ("password", PasswordValidationErrors::MissingDigit),
+            ("password1", PasswordValidationErrors::MissingUppercase),
         ];
         for (input, expected_err) in invalid_passwords {
             let result = PasswordValidator::new(input);
