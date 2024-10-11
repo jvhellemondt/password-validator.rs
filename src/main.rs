@@ -45,7 +45,13 @@ mod tests {
 
     #[test]
     fn valid_passwords() {
-        let valid_passwords: Vec<&str> = vec!["Password1"];
+        let valid_passwords: Vec<&str> = vec![
+            "Password1",
+            "Pass1234",
+            "Abcdef1",
+            "HelloWorld123",
+            "Secure9",
+        ];
         for input in valid_passwords {
             let result = PasswordValidator::new(input);
             assert!(result.is_ok());
