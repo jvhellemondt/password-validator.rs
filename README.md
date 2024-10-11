@@ -28,17 +28,24 @@ Value in:
 
 Value out (success):
 ```rust
-struct Password {
-  value: String
-}
+struct Password(String);
 ```
 
 Value out (errors):
 * Vec with errors
 
+```rust
+pub enum PasswordValidationError {
+  TooShort,
+  TooLong,
+  MissingDigit,
+  MissingUppercase,
+}
+```
+
 API:
 ```rust
-let passwordResult = Password::new(serialized_input);
+let password_result = Password::new(input);
 ```
 
 ### AUTOMATE
@@ -65,8 +72,22 @@ Use cargo test in watch-mode with in-file tests.
 - it_should_not_allow_passwordpassword_as_a_password_because_it_lacks_digits_and_uppercase_letters
 - it_should_not_allow_1234567890_as_a_password_because_it_lacks_uppercase_letters
 
-### TEST
-### REFINE
+### TEST ✅
+
+### REFINE ✅
+
+## Grading Checklist
+
+- ✅ I have implemented the minimum requirements listed in the project description
+- ✅ I have Programmed By Wishful Thinking, designing the response API before it was actually created
+- ✅ I have Worked Backwards, starting at the Assert, then going to the Act and the Arrange
+- ✅ I have tests that validate the following statements
+  - ✅ "maxwell1_c" returns a false-y response because of a lack of uppercase characters
+  - ✅ "maxwellTheBe" returns a false-y response because of a lack of digits
+  - ✅ "thePhysical1234567" returns a false-y response because of exceeding the 15 character length
+- ✅ Once I have made the aforementioned tests pass, I have refactored my test specifications to use it.each() to perform
+  parameterization if there is sufficient duplication (see Tip #3 here)
+- ✅ There is no duplication in my test code or my production code
 
 ## Focus on the following, using FA²STR
 You want to shift to using FA²STR to think through your solutions methodically now. Here's how to use it on this assignment:
