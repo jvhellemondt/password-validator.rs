@@ -137,6 +137,15 @@ mod tests {
                 "1234567890",
                 vec![PasswordValidationErrors::MissingUppercase],
             ),
+            (
+                "maxwell1_c",
+                vec![PasswordValidationErrors::MissingUppercase],
+            ),
+            ("maxwellTheBe", vec![PasswordValidationErrors::MissingDigit]),
+            (
+                "thePhysical1234567",
+                vec![PasswordValidationErrors::TooLong],
+            ),
         ];
         for (input, expected_errs) in invalid_passwords {
             let result = PasswordValidator::new(input);
