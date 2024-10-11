@@ -3,7 +3,9 @@ fn main() {
 }
 
 #[derive(Debug, PartialEq)]
-enum PasswordValidationErrors {}
+enum PasswordValidationErrors {
+    TooShort
+}
 
 #[derive(Debug, PartialEq)]
 struct Password(String);
@@ -12,9 +14,11 @@ struct Password(String);
 struct PasswordValidator;
 
 impl PasswordValidator {
-    fn new() -> Result<Password, PasswordValidationErrors> {
-        let value = String::from("");
-        Ok(Password(value))
+    fn new(value: &str) -> Result<Password, PasswordValidationErrors> {
+        if value.len() <= 5 {
+            return Err(PasswordValidationErrors::TooShort);
+        }
+        Ok(Password(value.to_string()))
     }
 }
 
@@ -24,15 +28,18 @@ mod tests {
 
     #[test]
     fn it_should_be_able_to_create_a_password() {
-        let value = String::from("");
-        let password_result = PasswordValidator::new();
-        assert_eq!(password_result, Ok(Password(value)));
+        let value = "Pass1234";
+        let password_result = PasswordValidator::new(&value);
+        assert!(password_result.is_ok());
+        assert_eq!(password_result.unwrap(), Password(value.to_string()));
     }
 
     #[test]
-    #[ignore]
     fn it_should_verify_passwords_are_longer_than_5_characters() {
-        // TODO: Implement the logic for rejecting passwords shorter than 5 characters.
+        let value = "Short";
+        let password_result = PasswordValidator::new(&value);
+        assert!(password_result.is_err());
+        assert_eq!(password_result.unwrap_err(), PasswordValidationErrors::TooShort);
     }
 
     #[test]
