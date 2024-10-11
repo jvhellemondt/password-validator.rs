@@ -4,7 +4,8 @@ fn main() {
 
 #[derive(Debug, PartialEq)]
 enum PasswordValidationErrors {
-    TooShort
+    TooShort,
+    TooLong
 }
 
 #[derive(Debug, PartialEq)]
@@ -18,6 +19,9 @@ impl PasswordValidator {
         if value.len() <= 5 {
             return Err(PasswordValidationErrors::TooShort);
         }
+        if value.len() >= 15 {
+            return Err(PasswordValidationErrors::TooLong);
+        }
         Ok(Password(value.to_string()))
     }
 }
@@ -28,7 +32,7 @@ mod tests {
 
     #[test]
     fn it_should_be_able_to_create_a_password() {
-        let value = "Pass1234";
+        let value = "password";
         let password_result = PasswordValidator::new(&value);
         assert!(password_result.is_ok());
         assert_eq!(password_result.unwrap(), Password(value.to_string()));
@@ -36,16 +40,18 @@ mod tests {
 
     #[test]
     fn it_should_verify_passwords_are_longer_than_5_characters() {
-        let value = "Short";
+        let value = "short";
         let password_result = PasswordValidator::new(&value);
         assert!(password_result.is_err());
         assert_eq!(password_result.unwrap_err(), PasswordValidationErrors::TooShort);
     }
 
     #[test]
-    #[ignore]
     fn it_should_verify_passwords_are_less_than_15_characters() {
-        // TODO: Implement the logic for rejecting passwords longer than 15 characters.
+        let value = "this_password_is_way_too_long";
+        let password_result = PasswordValidator::new(&value);
+        assert!(password_result.is_err());
+        assert_eq!(password_result.unwrap_err(), PasswordValidationErrors::TooLong);
     }
 
     #[test]
