@@ -38,12 +38,10 @@ impl PasswordValidator {
 mod tests {
     use super::*;
 
-    type TestCase = (&'static str, Result<Password, PasswordValidationErrors>);
-
     #[test]
     fn valid_passwords() {
         let valid_passwords: Vec<&str> = vec!["password1"];
-        for (input) in valid_passwords {
+        for input in valid_passwords {
             let result = PasswordValidator::new(input);
             assert!(result.is_ok());
             assert_eq!(result.unwrap(), Password(input.to_string()));
@@ -51,39 +49,22 @@ mod tests {
     }
 
     #[test]
-    fn invalid_passwords() {}
-
-    #[test]
-    fn it_should_verify_passwords_are_longer_than_5_characters() {
-        let value = "short";
-        let password_result = PasswordValidator::new(&value);
-        assert!(password_result.is_err());
-        assert_eq!(
-            password_result.unwrap_err(),
-            PasswordValidationErrors::TooShort
-        );
-    }
-
-    #[test]
-    fn it_should_verify_passwords_are_less_than_15_characters() {
-        let value = "this_password_is_way_too_long";
-        let password_result = PasswordValidator::new(&value);
-        assert!(password_result.is_err());
-        assert_eq!(
-            password_result.unwrap_err(),
-            PasswordValidationErrors::TooLong
-        );
-    }
-
-    #[test]
-    fn it_should_verify_passwords_contain_at_least_1_digit() {
-        let value = "password";
-        let password_result = PasswordValidator::new(&value);
-        assert!(password_result.is_err());
-        assert_eq!(
-            password_result.unwrap_err(),
-            PasswordValidationErrors::MissingDigit
-        );
+    fn invalid_passwords() {
+        type TestCase = (&'static str, PasswordValidationErrors);
+        let invalid_passwords: Vec<TestCase> = vec![
+            ("short", PasswordValidationErrors::TooShort),
+            (
+                "this_password_is_way_too_long",
+                PasswordValidationErrors::TooLong,
+            ),
+            ("password", PasswordValidationErrors::MissingDigit),
+        ];
+        for (input, expected_err) in invalid_passwords {
+            let result = PasswordValidator::new(input);
+            dbg!(&input, &result, &expected_err);
+            assert!(result.is_err());
+            assert_eq!(result.unwrap_err(), expected_err);
+        }
     }
 
     #[test]
