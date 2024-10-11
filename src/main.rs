@@ -17,16 +17,17 @@ struct PasswordValidator;
 
 impl PasswordValidator {
     fn new(value: &str) -> Result<Password, PasswordValidationErrors> {
-        if value.len() <= 5 {
-            return Err(PasswordValidationErrors::TooShort);
+        let error = [
+            (value.len() <= 5, PasswordValidationErrors::TooShort),
+            (value.len() >= 15, PasswordValidationErrors::TooLong),
+            (!value.chars().any(|c| c.is_digit(10)), PasswordValidationErrors::MissingDigit),
+        ]
+            .into_iter()
+            .find_map(|(condition, error)| condition.then_some(error));
+        match error {
+            Some(e) => Err(e),
+            None => Ok(Password(value.to_string())),
         }
-        if value.len() >= 15 {
-            return Err(PasswordValidationErrors::TooLong);
-        }
-        if !value.chars().any(|c| c.is_digit(10)) {
-            return Err(PasswordValidationErrors::MissingDigit);
-        }
-        Ok(Password(value.to_string()))
     }
 }
 
