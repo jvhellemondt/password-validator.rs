@@ -5,7 +5,8 @@ fn main() {
 #[derive(Debug, PartialEq)]
 enum PasswordValidationErrors {
     TooShort,
-    TooLong
+    TooLong,
+    MissingDigit
 }
 
 #[derive(Debug, PartialEq)]
@@ -22,6 +23,9 @@ impl PasswordValidator {
         if value.len() >= 15 {
             return Err(PasswordValidationErrors::TooLong);
         }
+        if !value.chars().any(|c| c.is_digit(10)) {
+            return Err(PasswordValidationErrors::MissingDigit);
+        }
         Ok(Password(value.to_string()))
     }
 }
@@ -32,7 +36,7 @@ mod tests {
 
     #[test]
     fn it_should_be_able_to_create_a_password() {
-        let value = "password";
+        let value = "password1";
         let password_result = PasswordValidator::new(&value);
         assert!(password_result.is_ok());
         assert_eq!(password_result.unwrap(), Password(value.to_string()));
@@ -55,9 +59,11 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn it_should_verify_passwords_contain_at_least_1_digit() {
-        // TODO: Implement the logic for rejecting passwords without at least one digit.
+        let value = "password";
+        let password_result = PasswordValidator::new(&value);
+        assert!(password_result.is_err());
+        assert_eq!(password_result.unwrap_err(), PasswordValidationErrors::MissingDigit);
     }
 
     #[test]

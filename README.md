@@ -34,9 +34,18 @@ struct Password(String);
 Value out (errors):
 * Vec with errors
 
+```rust
+pub enum PasswordValidationError {
+  TooShort,
+  TooLong,
+  MissingDigit,
+  MissingUppercase,
+}
+```
+
 API:
 ```rust
-let passwordResult = Password::new(input);
+let password_result = Password::new(input);
 ```
 
 ### AUTOMATE
