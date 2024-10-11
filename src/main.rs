@@ -6,7 +6,7 @@ fn main() {
 enum PasswordValidationErrors {
     TooShort,
     TooLong,
-    MissingDigit
+    MissingDigit,
 }
 
 #[derive(Debug, PartialEq)]
@@ -20,10 +20,13 @@ impl PasswordValidator {
         let error = [
             (value.len() <= 5, PasswordValidationErrors::TooShort),
             (value.len() >= 15, PasswordValidationErrors::TooLong),
-            (!value.chars().any(|c| c.is_digit(10)), PasswordValidationErrors::MissingDigit),
+            (
+                !value.chars().any(|c| c.is_digit(10)),
+                PasswordValidationErrors::MissingDigit,
+            ),
         ]
-            .into_iter()
-            .find_map(|(condition, error)| condition.then_some(error));
+        .into_iter()
+        .find_map(|(condition, error)| condition.then_some(error));
         match error {
             Some(e) => Err(e),
             None => Ok(Password(value.to_string())),
@@ -35,20 +38,30 @@ impl PasswordValidator {
 mod tests {
     use super::*;
 
+    type TestCase = (&'static str, Result<Password, PasswordValidationErrors>);
+
     #[test]
-    fn it_should_be_able_to_create_a_password() {
-        let value = "password1";
-        let password_result = PasswordValidator::new(&value);
-        assert!(password_result.is_ok());
-        assert_eq!(password_result.unwrap(), Password(value.to_string()));
+    fn valid_passwords() {
+        let valid_passwords: Vec<&str> = vec!["password1"];
+        for (input) in valid_passwords {
+            let result = PasswordValidator::new(input);
+            assert!(result.is_ok());
+            assert_eq!(result.unwrap(), Password(input.to_string()));
+        }
     }
+
+    #[test]
+    fn invalid_passwords() {}
 
     #[test]
     fn it_should_verify_passwords_are_longer_than_5_characters() {
         let value = "short";
         let password_result = PasswordValidator::new(&value);
         assert!(password_result.is_err());
-        assert_eq!(password_result.unwrap_err(), PasswordValidationErrors::TooShort);
+        assert_eq!(
+            password_result.unwrap_err(),
+            PasswordValidationErrors::TooShort
+        );
     }
 
     #[test]
@@ -56,7 +69,10 @@ mod tests {
         let value = "this_password_is_way_too_long";
         let password_result = PasswordValidator::new(&value);
         assert!(password_result.is_err());
-        assert_eq!(password_result.unwrap_err(), PasswordValidationErrors::TooLong);
+        assert_eq!(
+            password_result.unwrap_err(),
+            PasswordValidationErrors::TooLong
+        );
     }
 
     #[test]
@@ -64,7 +80,10 @@ mod tests {
         let value = "password";
         let password_result = PasswordValidator::new(&value);
         assert!(password_result.is_err());
-        assert_eq!(password_result.unwrap_err(), PasswordValidationErrors::MissingDigit);
+        assert_eq!(
+            password_result.unwrap_err(),
+            PasswordValidationErrors::MissingDigit
+        );
     }
 
     #[test]
@@ -99,13 +118,15 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn it_should_not_allow_john_as_a_password_because_it_is_too_short_and_lacks_digits_and_uppercase_letters() {
+    fn it_should_not_allow_john_as_a_password_because_it_is_too_short_and_lacks_digits_and_uppercase_letters(
+    ) {
         // TODO: Implement the logic for rejecting "john" as a password.
     }
 
     #[test]
     #[ignore]
-    fn it_should_not_allow_supersecurepassword_as_a_password_because_it_exceeds_length_limit_and_lacks_digits() {
+    fn it_should_not_allow_supersecurepassword_as_a_password_because_it_exceeds_length_limit_and_lacks_digits(
+    ) {
         // TODO: Implement the logic for rejecting "SuperSecurePassword" as a password.
     }
 
@@ -135,7 +156,8 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn it_should_not_allow_passwordpassword_as_a_password_because_it_lacks_digits_and_uppercase_letters() {
+    fn it_should_not_allow_passwordpassword_as_a_password_because_it_lacks_digits_and_uppercase_letters(
+    ) {
         // TODO: Implement the logic for rejecting "passwordpassword" as a password.
     }
 
