@@ -2,7 +2,7 @@ fn main() {
     println!("Hello, world!");
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 enum PasswordValidationErrors {
     TooShort,
     TooLong,
@@ -10,15 +10,15 @@ enum PasswordValidationErrors {
     MissingUppercase,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 struct Password(String);
 
 #[derive(Debug)]
 struct PasswordValidator;
 
 impl PasswordValidator {
-    fn new(value: &str) -> Result<Password, PasswordValidationErrors> {
-        let error = [
+    fn new(value: &str) -> Result<Password, Vec<PasswordValidationErrors>> {
+        let business_rules = [
             (value.len() <= 5, PasswordValidationErrors::TooShort),
             (value.len() >= 15, PasswordValidationErrors::TooLong),
             (
@@ -29,12 +29,15 @@ impl PasswordValidator {
                 !value.chars().any(|c| c.is_uppercase()),
                 PasswordValidationErrors::MissingUppercase,
             ),
-        ]
-        .into_iter()
-        .find_map(|(condition, error)| condition.then_some(error));
-        match error {
-            Some(e) => Err(e),
-            None => Ok(Password(value.to_string())),
+        ];
+        let errors: Vec<PasswordValidationErrors> = business_rules
+            .iter()
+            .filter_map(|&(condition, ref error)| condition.then(|| error.clone()))
+            .collect();
+
+        match errors.is_empty() {
+            true => Ok(Password(value.to_string())),
+            false => Err(errors),
         }
     }
 }
@@ -61,21 +64,33 @@ mod tests {
 
     #[test]
     fn invalid_passwords() {
-        type TestCase = (&'static str, PasswordValidationErrors);
+        type TestCase = (&'static str, Vec<PasswordValidationErrors>);
         let invalid_passwords: Vec<TestCase> = vec![
-            ("short", PasswordValidationErrors::TooShort),
+            ("short", vec![PasswordValidationErrors::TooShort]),
             (
                 "this_password_is_way_too_long",
-                PasswordValidationErrors::TooLong,
+                vec![PasswordValidationErrors::TooLong],
             ),
-            ("password", PasswordValidationErrors::MissingDigit),
-            ("password1", PasswordValidationErrors::MissingUppercase),
+            ("password", vec![PasswordValidationErrors::MissingDigit]),
+            (
+                "password1",
+                vec![PasswordValidationErrors::MissingUppercase],
+            ),
+            (
+                "passwordpassword",
+                vec![
+                    PasswordValidationErrors::MissingDigit,
+                    PasswordValidationErrors::MissingUppercase,
+                ],
+            ),
         ];
-        for (input, expected_err) in invalid_passwords {
+        for (input, expected_errs) in invalid_passwords {
             let result = PasswordValidator::new(input);
-            dbg!(&input, &result, &expected_err);
+            dbg!(&input, &result, &expected_errs);
             assert!(result.is_err());
-            assert_eq!(result.unwrap_err(), expected_err);
+            for expected_err in expected_errs {
+                assert!(result.clone().unwrap_err().contains(&expected_err));
+            }
         }
     }
 
